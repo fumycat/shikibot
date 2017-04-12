@@ -63,7 +63,7 @@ def button(bot, update):
         text=escapize(info['description'])
     )
     print('editing')
-    bot.editMessageText(message_id=update.callback_query.inline_message_id,
+    bot.editMessageText(inline_message_id=update.callback_query.inline_message_id,
                         text=result,
                         parse_mode='HTML')
 
