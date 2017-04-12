@@ -20,7 +20,7 @@ def start(bot, update):
 
 
 def inline_query(bot, update):
-    query = update.inline_query.query.replace(' ', '+')
+    query = update.inline_query.query
     if query == '':
         return
     print('inline query -', query)
@@ -30,8 +30,8 @@ def inline_query(bot, update):
     print('success request')
     for result in search_results:
         print('.', end='')
-        keyboard = [[InlineKeyboardButton('Описание', callback_data=result['id'])]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
+        #keyboard = [[InlineKeyboardButton('Описание', callback_data=result['id'])]]
+        #reply_markup = InlineKeyboardMarkup(keyboard)
         description = result['kind'].title() + ' - ' + str(result['episodes'])
         text = '<b>' + result['russian'] + '</b>\nhttps://shikimori.org/' + result['url']
         inline_results.append(
@@ -40,10 +40,10 @@ def inline_query(bot, update):
                                      title=result['russian'],
                                      description=description,
                                      input_message_content=InputTextMessageContent(text, parse_mode='HTML'),
-                                     reply_markup=reply_markup,
+                                     #reply_markup=reply_markup,
                                      thumb_url='https://shikimori.org' + result['image']['preview']))
-
-    bot.answerInlineQuery(update.inline_query.id, results=inline_results)
+    print('\nready')
+    bot.answerInlineQuery(update.inline_query.id, results=inline_results, cache_time=600)
 
 
 def button(bot, update):
