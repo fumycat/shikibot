@@ -6,6 +6,8 @@ import requests as http
 from telegram import InlineQueryResultArticle, InputTextMessageContent, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, InlineQueryHandler, CallbackQueryHandler
 
+from pprint import pprint
+
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 API = 'https://shikimori.org/api/'
 SEARCH_LIMIT = 30  # must be <= 50
@@ -31,6 +33,7 @@ def inline_query(bot, update):
     search_results = http.get('{}animes?limit={}&search={}'.format(API, SEARCH_LIMIT, query)).json()
 
     for i, result in enumerate(search_results):
+        pprint(result)
         print(i)
         description = result['kind'].title() + ' - ' + str(result['episodes'])
         text = '<b>' + result['russian'] + '</b>\nhttps://shikimori.org' + result['url']
