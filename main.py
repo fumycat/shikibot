@@ -6,7 +6,6 @@ import requests as http
 from telegram import InlineQueryResultArticle, InputTextMessageContent, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, InlineQueryHandler, CallbackQueryHandler
 
-from pprint import pprint
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 API = 'https://shikimori.org/api/'
@@ -32,14 +31,10 @@ def inline_query(bot, update):
 
     search_results = http.get('{}animes?limit={}&search={}'.format(API, SEARCH_LIMIT, query)).json()
 
-    for i, result in enumerate(search_results):
-        pprint(result)
-        print(i)
+    for result in search_results:
         description = result['kind'].title() + ' - ' + str(result['episodes'])
         text = '<b>' + result['russian'] + '</b>\nhttps://shikimori.org' + result['url']
-        print('kb creation start')
         keyboard = kb(str(result['id']))
-        print('end kb creation')
         inline_results.append(
             InlineQueryResultArticle(type='article',
                                      id=uuid.uuid4(),
@@ -48,16 +43,17 @@ def inline_query(bot, update):
                                      input_message_content=InputTextMessageContent(text, parse_mode='HTML'),
                                      thumb_url='https://shikimori.org' + result['image']['preview'],
                                      reply_markup=keyboard))
-        print('end result n', i)
-    print('ready')
     bot.answerInlineQuery(update.inline_query.id, results=inline_results, cache_time=600)
 
 
 def button(bot, update):
-    info = http.get('{}animes/{}'.format(API, update.callback_query.data)).json()
+    url = '{}animes/{}'.format(API, update.callback_query.data)
+    print('requesting', url)
+    info = http.get(url).json()
+    print('success request, forming ep info')
     ep_info = 'Эпизоды: {}'.format(info['episodes']) if info['episodes'] == info['episodes_aired'] else\
         'Эпизоды: {}/{}'.format(info['episodes_aired'], info['episodes'] if str(info['episodes']) != '0' else '∞')
-
+    print('Forming final result')
     result = '<b>{name}</b> <i>({stars}/10)</i>\n<i>{genre}\n{ep}\n{dur}</i>\n\n{text}'.format(
         name=escapize(info['russian']),
         stars=info['score'],
@@ -66,6 +62,7 @@ def button(bot, update):
         dur='Длительность эпизода: {} мин.'.format(info['duration']),
         text=escapize(info['description'])
     )
+    print('editing')
     bot.editMessageText(message_id=update.callback_query.inline_message_id,
                         text=result,
                         parse_mode='HTML')
