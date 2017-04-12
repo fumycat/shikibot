@@ -21,6 +21,8 @@ def start(bot, update):
 
 def inline_query(bot, update):
     query = update.inline_query.query.replace(' ', '+')
+    if query == '':
+        return
     print('inline query -', query)
     inline_results = list()
 
@@ -33,11 +35,13 @@ def inline_query(bot, update):
         description = result['kind'].title() + ' - ' + str(result['episodes'])
         text = '<b>' + result['russian'] + '</b>\nhttps://shikimori.org/' + result['url']
         inline_results.append(
-            InlineQueryResultArticle(id=uuid.uuid4(),
+            InlineQueryResultArticle(type='article',
+                                     id=uuid.uuid4(),
                                      title=result['russian'],
                                      description=description,
                                      input_message_content=InputTextMessageContent(text, parse_mode='HTML'),
-                                     reply_markup=reply_markup))
+                                     reply_markup=reply_markup,
+                                     thumb_url='https://shikimori.org' + result['image']['preview']))
 
     bot.answerInlineQuery(update.inline_query.id, results=inline_results)
 
