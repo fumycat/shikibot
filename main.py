@@ -20,12 +20,14 @@ def start(bot, update):
 
 
 def inline_query(bot, update):
-    query = update.inline_query.query
+    query = update.inline_query.query.replace(' ', '+')
+    print('inline query -', query)
     inline_results = list()
 
     search_results = http.get('{}animes?limit={}&search={}'.format(API, SEARCH_LIMIT, query)).json()
-
+    print('success request')
     for result in search_results:
+        print('.', end='')
         keyboard = [[InlineKeyboardButton('Описание', callback_data=result['id'])]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         description = result['kind'].title() + ' - ' + str(result['episodes'])
