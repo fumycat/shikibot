@@ -1,4 +1,5 @@
 import os
+import re
 import uuid
 import logging
 
@@ -6,20 +7,26 @@ import requests as http
 from telegram import InlineQueryResultArticle, InputTextMessageContent, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, InlineQueryHandler, CallbackQueryHandler
 
-
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 API = 'https://shikimori.org/api/'
 SEARCH_LIMIT = 30  # must be <= 50
 
 
 def escapize(text):
-    return text.replace('&', '&amp;') \
-        .replace('<', '&lt;') \
-        .replace('>', '&gt;')
+    """
+    Sorry
+    """
+    return re.sub(' +', ' ',
+                  re.sub("[\[].*?[\]]", "", text)
+                  .replace('&', '&amp;')
+                  .replace('<', '&lt;')
+                  .replace('>', '&gt;'))
 
 
 def start(bot, update):
-    update.message.reply_text('Введите <code>@shikibot ЗАПРОС</code> в строке набора, чтобы найти аниме \nПример:\n@shikibot lucky star\n\nЭтот бот использует апи сайта shikimori.org\nАвтор: @fumycat', parse_mode='HTML')
+    update.message.reply_text(
+        'Введите <code>@shikibot ЗАПРОС</code> в строке набора, чтобы найти аниме \nПример:\n<code>@shikibot твоё имя</code>\n\nЭтот бот использует апи сайта shikimori.org\nАвтор: @fumycat',
+        parse_mode='HTML')
 
 
 def inline_query(bot, update):
@@ -50,19 +57,18 @@ def button(bot, update):
     url = '{}animes/{}'.format(API, update.callback_query.data)
     print('requesting', url)
     info = http.get(url).json()
-    print('success request, forming ep info')
-    ep_info = 'Эпизоды: {}'.format(info['episodes']) if info['episodes'] == info['episodes_aired'] else\
-        'Эпизоды: {}/{}'.format(info['episodes_aired'], info['episodes'] if str(info['episodes']) != '0' else '∞')
-    print('Forming final result')
-    result = '<b>{name}</b> <i>({stars}/10)</i>\n<i>{genre}\n{ep}\n{dur}</i>\n\n{text}'.format(
+    ep_info = 'Эпизоды: {}'.format(
+        info['episodes']) if info['episodes'] == info['episodes_aired'] or info['episodes_aired'] == 0 else \
+        'Эпизоды: {}/{}'.format(info['episodes_aired'], info['episodes'] if info['episodes'] != 0 else '∞')
+    result = '<b>{name}</b> <i>({stars}/10)</i>\n<i>{genre}\n{ep}\n{dur}</i>\n\n{text}\n{ur}'.format(
         name=escapize(info['russian']),
         stars=info['score'],
         genre=', '.join([g['russian'] for g in info.get('genres', [])]),
         ep=ep_info,
         dur='Длительность эпизода: {} мин.'.format(info['duration']),
-        text=escapize(info['description'])
+        text=escapize(info['description']),
+        ur='https://shikimori.org' + info['url']
     )
-    print('editing')
     bot.editMessageText(inline_message_id=update.callback_query.inline_message_id,
                         text=result,
                         parse_mode='HTML')
