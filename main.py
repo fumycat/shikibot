@@ -29,7 +29,6 @@ def inline_query(bot, update):
     search_results = http.get('{}animes?limit={}&search={}'.format(API, SEARCH_LIMIT, query)).json()
 
     for result in search_results:
-        keyboard = [[InlineKeyboardButton(text='Описание', callback_data=str(result['id']))]]
         description = result['kind'].title() + ' - ' + str(result['episodes'])
         text = '<b>' + result['russian'] + '</b>\nhttps://shikimori.org' + result['url']
         inline_results.append(
@@ -38,7 +37,7 @@ def inline_query(bot, update):
                                      title=result['russian'],
                                      description=description,
                                      input_message_content=InputTextMessageContent(text, parse_mode='HTML'),
-                                     reply_markup=InlineKeyboardMarkup(keyboard),
+                                     reply_markup=kb(str(result['id'])),
                                      thumb_url='https://shikimori.org' + result['image']['preview']))
     print('ready')
     print(bot.answerInlineQuery(update.inline_query.id, results=inline_results, cache_time=600))
@@ -62,6 +61,11 @@ def button(bot, update):
                         parse_mode='HTML')
 
 
+def kb(data):
+    keyboard = [InlineKeyboardButton(text='Описание', callback_data=data)]
+    return InlineKeyboardMarkup(keyboard)
+
+
 if __name__ == '__main__':
     TOKEN = os.environ.get('TOKEN')
     updater = Updater(TOKEN)
@@ -71,7 +75,7 @@ if __name__ == '__main__':
 
     dispatcher.add_handler(CommandHandler('start', start))
     dispatcher.add_handler(CommandHandler('help', start))
-    dispatcher.add_handler(InlineQueryHandler(inline_query))
     dispatcher.add_handler(CallbackQueryHandler(button))
+    dispatcher.add_handler(InlineQueryHandler(inline_query))
 
     updater.idle()
