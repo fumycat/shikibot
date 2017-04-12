@@ -1,10 +1,12 @@
 import os
 import uuid
+import logging
 
 import requests as http
 from telegram import InlineQueryResultArticle, InputTextMessageContent, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, InlineQueryHandler, CallbackQueryHandler
 
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 API = 'https://shikimori.org/api/'
 SEARCH_LIMIT = 30  # must be <= 50
 
