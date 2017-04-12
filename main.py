@@ -72,7 +72,7 @@ def button(bot, update):
 
 
 def kb(data):
-    keyboard = [InlineKeyboardButton(text='Описание', callback_data=data)]
+    keyboard = [[InlineKeyboardButton(text='Описание', callback_data=data)]]
     return InlineKeyboardMarkup(keyboard)
 
 
