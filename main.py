@@ -28,19 +28,24 @@ def inline_query(bot, update):
 
     search_results = http.get('{}animes?limit={}&search={}'.format(API, SEARCH_LIMIT, query)).json()
 
-    for result in search_results:
+    for i, result in enumerate(search_results):
+        print(i)
         description = result['kind'].title() + ' - ' + str(result['episodes'])
         text = '<b>' + result['russian'] + '</b>\nhttps://shikimori.org' + result['url']
+        print('kb creation start')
+        keyboard = kb(str(result['id']))
+        print('end kb creation')
         inline_results.append(
             InlineQueryResultArticle(type='article',
                                      id=uuid.uuid4(),
                                      title=result['russian'],
                                      description=description,
                                      input_message_content=InputTextMessageContent(text, parse_mode='HTML'),
-                                     reply_markup=kb(str(result['id'])),
-                                     thumb_url='https://shikimori.org' + result['image']['preview']))
+                                     thumb_url='https://shikimori.org' + result['image']['preview'],
+                                     reply_markup=keyboard))
+        print('end result n', i)
     print('ready')
-    print(bot.answerInlineQuery(update.inline_query.id, results=inline_results, cache_time=600))
+    bot.answerInlineQuery(update.inline_query.id, results=inline_results, cache_time=600)
 
 
 def button(bot, update):
