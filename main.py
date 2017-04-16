@@ -66,7 +66,7 @@ def button(bot, update):
         genre=', '.join([g['russian'] for g in info.get('genres', [])]),
         ep=ep_info,
         dur='Длительность эпизода: {} мин.'.format(info['duration']),
-        text=escapize(info['description']),
+        text=escapize(info.get('description', '<i>Нет описания</i>')),
         ur='https://shikimori.org' + info['url']
     )
     bot.editMessageText(inline_message_id=update.callback_query.inline_message_id,
